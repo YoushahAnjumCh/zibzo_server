@@ -5,18 +5,32 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = __importDefault(require("mongoose"));
 const { Schema } = mongoose_1.default;
-const ratingSchema = new Schema({
-    rate: Number,
-    count: Number,
+const metaSchema = new Schema({
+    createdAt: Date,
+    updatedAt: Date,
+    barcode: String,
+    qrCode: String,
 });
+// Define the main product schema
 const productSchema = new Schema({
-    id: Number,
-    title: String,
-    price: Number,
-    description: String,
-    category: String,
-    images: String,
-    rating: ratingSchema,
+    id: { type: Number },
+    title: { type: String, required: true },
+    subtitle: { type: String, required: true },
+    category: { type: String, required: true },
+    image: { type: [], required: true },
+    offerPrice: { type: Number, required: true },
+    actualPrice: { type: Number, required: true },
+    offerPercentage: { type: Number, required: true },
+    stock: { type: Number },
+    brand: String,
+    sku: String,
+    warrantyInformation: String,
+    shippingInformation: String,
+    availabilityStatus: String,
+    returnPolicy: String,
+    meta: metaSchema,
+    thumbnail: String,
 });
+// Create the product model
 const Product = mongoose_1.default.model("products", productSchema);
 exports.default = Product;

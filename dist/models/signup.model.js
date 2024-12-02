@@ -29,8 +29,9 @@ const signupSchema = new mongoose_1.Schema({
     email: { type: String },
     password: { type: String },
     createdAt: { type: Date, default: Date.now },
-    firstName: { type: String },
-    lastName: { type: String },
+    uid: { type: Number },
+    userName: { type: String },
+    userImage: { type: String },
     mobile: { type: Number },
 });
 // Add a pre-save hook to hash the password
@@ -41,5 +42,5 @@ signupSchema.pre("save", async function (next) {
     }
     next();
 });
-const signupModel = mongoose_1.default.model("Signup", signupSchema);
+const signupModel = mongoose_1.default.model("signup", signupSchema);
 exports.default = signupModel;
