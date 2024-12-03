@@ -27,6 +27,8 @@ jobs:
     needs: build
     runs-on: self-hosted
     steps:
+      - name: Login to docker Hub
+        run: docker login -u ${{secrets.DOCKER_USERNAME}} -p ${{secrets.DOCKER_PASSWORD}}
       - name: Pull image from docker Image
         run: docker pull youshahch4499/zibzo_server:latest
       - name: Run docker Container
