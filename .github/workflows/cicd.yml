@@ -30,8 +30,6 @@ jobs:
         run: docker login -u ${{secrets.DOCKER_USERNAME}} -p ${{secrets.DOCKER_PASSWORD}}
       - name: Pull image from docker Image
         run: docker pull youshahch4499/zibzo_server:latest
-      - name: Stop zibzo_server-container Container
-        run: docker stop zibzo_server-container
       - name: Remove zibzo_server-container Container
         run: docker rm zibzo_server-container
       - name: Run docker Container
