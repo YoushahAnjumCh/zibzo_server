@@ -13,8 +13,6 @@ jobs:
         uses: actions/checkout@v4
       - name: Login to docker Hub
         run: docker login -u ${{secrets.DOCKER_USERNAME}} -p ${{secrets.DOCKER_PASSWORD}}
-      - name: Debug Repository Content
-        run: ls -R
       - name: Build Docker Image
         run: docker build -t youshahch4499/zibzo_server .
       - name: Publish image to docker hub
