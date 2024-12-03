@@ -1,6 +1,6 @@
 FROM node:alpine3.18
 WORKDIR /app
-COPY package.json package-lock.json ./
+COPY package.json ./
 RUN rm -rf node_modules
 RUN rm -rf package-lock.json
 RUN npm cache clean --force
