@@ -1,0 +1,28 @@
+name: "Deploy Zibzo application server"
+
+on:
+  push:
+    branches:
+      - API_v2
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Source
+        uses: actions/checkout@v4
+      - name: Login to docker Hub
+        run: docker login -u ${{secrets.DOCKER_USERNAME}} -p ${{secrets.DOCKER_PASSWORD}}
+      - name: Build Docker Image
+        run: docker build -t youshahch4499/zibzo_server .
+      - name: Publish image to docker hub
+        run: docker push youshahch4499/zibzo_server:latest
+
+  deploy:
+    needs: build
+    runs-on: self-hosted
+    steps:
+      - name: Pull image from docker Image
+        run: docker pull youshahch4499/zibzo_server:latest
+      - name: Run docker Container
+        run: docker run -d -p 4000:4000 --name zibzo_server-container -e MONGO_PASSWORD='${{secrets.MONGO_PASSWORD}}' youshahch4499/zibzo_server
