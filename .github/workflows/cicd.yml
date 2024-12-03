@@ -18,10 +18,10 @@ jobs:
           docker builder prune -f
       - name: Debug Directory Contents
         run: ls -la
+
       - name: Build Docker Image
         run: docker build -t youshahch4499/zibzo_server .
-      - name: Remove already existing Docker Image
-        run: docker rmi youshahch4499/zibzo_server:latest
+
       - name: Publish image to docker hub
         run: docker push youshahch4499/zibzo_server:latest
 
