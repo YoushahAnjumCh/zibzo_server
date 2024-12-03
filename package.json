@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "start": "concurrently --kill-others \"tsc -w\" \"nodemon dist/app.js\""
+    "start": "nodemon dist/app.js",
+    "docker:build": "docker build -f ./Dockerfile . "
   },
   "dependencies": {
     "@types/bcrypt": "^5.0.0",
