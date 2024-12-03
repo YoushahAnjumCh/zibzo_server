@@ -13,6 +13,9 @@ jobs:
         uses: actions/checkout@v4
       - name: Login to docker Hub
         run: docker login -u ${{secrets.DOCKER_USERNAME}} -p ${{secrets.DOCKER_PASSWORD}}
+      - name: Clear Docker cache
+        run: |
+          docker builder prune -f
       - name: Debug Directory Contents
         run: ls -la
       - name: Build Docker Image
