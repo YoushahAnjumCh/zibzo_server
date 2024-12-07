@@ -3,8 +3,8 @@ name: "Deploy Zibzo application server"
 on:
   push:
     branches:
-      - API_v2
-
+      - "**"
+  workflow_dispatch:
 jobs:
   build:
     runs-on: ubuntu-latest
