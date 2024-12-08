@@ -108,7 +108,7 @@ router.post("/adminLogin", async (req, res) => {
                         email: user.email,
                         lastLogin: new Date().toISOString(),
                     };
-                    jsonwebtoken_1.default.sign(payload, (_a = process.env.JWT_SECRET_KEY) !== null && _a !== void 0 ? _a : "", (err, token) => {
+                    jsonwebtoken_1.default.sign(payload, (_a = process.env.JWT_SECRET_KEY) !== null && _a !== void 0 ? _a : "JWT_SECRET_KEY", (err, token) => {
                         if (err) {
                             return res.status(500).json({ msg: "Error generating token" });
                         }
