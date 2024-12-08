@@ -15,10 +15,14 @@ const password = process.env.MONGO_PASSWORD;
 
 const connectionString = `mongodb+srv://Youshah4499:${password}@zibzo.tqwnn.mongodb.net/zibzo_server?retryWrites=true&w=majority&appName=ZibZo`;
 
-mongoose.connect(connectionString || "", {});
-mongoose.connection.on("open", () => {
-  console.log("Onlineshoppingdb connected successfully !");
-});
+mongoose
+  .connect(connectionString)
+  .then(() => {
+    console.log("Connected to MongoDB successfully!");
+  })
+  .catch((err) => {
+    console.error("Error connecting to MongoDB:", err);
+  });
 
 var app = express();
 
