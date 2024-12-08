@@ -15,8 +15,9 @@ const upload_data_route_1 = __importDefault(require("./routes/upload_data.route"
 const cart_route_1 = __importDefault(require("./routes/cart.route"));
 dotenv_1.default.config();
 const password = process.env.MONGO_PASSWORD;
-const connectionString = `mongodb+srv://Youshah4499:${password}@zibzo.tqwnn.mongodb.net/zibzo_server?retryWrites=true&w=majority&appName=ZibZo`;
-mongoose_1.default.connect(connectionString || "", {});
+// const connectionString = `mongodb+srv://Youshah4499:${password}@zibzo.tqwnn.mongodb.net/zibzo_server?retryWrites=true&w=majority&appName=ZibZo`;
+const connectionString = "mongodb://localhost:27017/zibzo_server";
+mongoose_1.default.connect(connectionString);
 mongoose_1.default.connection.on("open", () => {
     console.log("Onlineshoppingdb connected successfully !");
 });
@@ -28,9 +29,6 @@ app.use((_req, res, next) => {
 });
 app.use(express_1.default.json({ limit: "10mb" }));
 app.use(express_1.default.urlencoded({ limit: "10mb", extended: true }));
-app.get("/", (req, res) => {
-    res.send("Hello World");
-});
 app.use((0, cors_1.default)()); // enable cors at application level
 app.use(express_1.default.json());
 app.use(express_1.default.urlencoded({ extended: false }));
@@ -41,6 +39,7 @@ app.use("/wishlist", wishlist_route_1.default);
 app.use("/order_details", order_details_route_1.default);
 app.use("/cart", cart_route_1.default);
 app.use("/upload", upload_data_route_1.default);
-app.listen(process.env.PORT, () => {
-    console.log(`Server running @ port ${process.env.PORT} !`);
+const PORT = process.env.PORT || 4000;
+app.listen(PORT, () => {
+    console.log(`Server running @ port ${PORT} !`);
 });

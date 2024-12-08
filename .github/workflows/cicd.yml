@@ -32,7 +32,7 @@ jobs:
         run: docker pull youshahch4499/zibzo_server:latest
       - name: Stop zibzo_server-container Container
         run: docker stop zibzo_server-container
-      - name: Remove zibzo_server-container Container
-        run: docker rm zibzo_server-container
+      - name: Remove old container
+        run: docker rm -f zibzo_server-container
       - name: Run docker Container
         run: docker run -d -p 4000:4000 --name zibzo_server-container -e PORT=4000 -e MONGO_PASSWORD='${{secrets.MONGO_PASSWORD}}' youshahch4499/zibzo_server

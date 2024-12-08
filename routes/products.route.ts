@@ -30,9 +30,6 @@ router.get("/", async (req: Request, res: Response) => {
 
     const cartProductCount = existingCart ? existingCart.productID.length : 0;
 
-    if (products.length === 0) {
-      return res.status(404).json({ message: "No products found!" });
-    }
     return res.status(200).json({
       products,
       homebanner,

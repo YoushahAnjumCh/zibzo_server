@@ -52,7 +52,6 @@ router.post("/login", async (req, res) => {
     var _a;
     const { email, password } = req.body;
     try {
-        console.log(password);
         const user = await signup_model_1.default.findOne({ email: email });
         if (user) {
             if (user.uid == 2) {
@@ -62,10 +61,11 @@ router.post("/login", async (req, res) => {
                         email: user.email,
                         lastLogin: new Date().toISOString(),
                     };
-                    jsonwebtoken_1.default.sign(payload, (_a = process.env.JWT_SECRET_KEY) !== null && _a !== void 0 ? _a : "", (err, token) => {
+                    jsonwebtoken_1.default.sign(payload, (_a = process.env.JWT_SECRET_KEY) !== null && _a !== void 0 ? _a : "JWT_SECRET_KEY", (err, token) => {
                         if (err) {
-                            console.error(err);
-                            return res.status(500).json({ msg: "Error generating token" });
+                            return res
+                                .status(500)
+                                .json({ msg: "Error generating token" + err });
                         }
                         else {
                             return res.status(200).json({
@@ -91,7 +91,6 @@ router.post("/login", async (req, res) => {
         }
     }
     catch (error) {
-        console.error(error);
         return res.status(500).json({ msg: "Server error" });
     }
 });
@@ -111,8 +110,6 @@ router.post("/adminLogin", async (req, res) => {
                     };
                     jsonwebtoken_1.default.sign(payload, (_a = process.env.JWT_SECRET_KEY) !== null && _a !== void 0 ? _a : "", (err, token) => {
                         if (err) {
-                            console.error(err);
-                            console.log("TTr" + err);
                             return res.status(500).json({ msg: "Error generating token" });
                         }
                         else {
@@ -138,7 +135,6 @@ router.post("/adminLogin", async (req, res) => {
         }
     }
     catch (error) {
-        console.error(error);
         return res.status(500).json({ msg: "Server error" });
     }
 });

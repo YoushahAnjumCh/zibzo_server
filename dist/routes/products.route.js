@@ -27,9 +27,6 @@ router.get("/", async (req, res) => {
         const offerdeal = await deal_of_the_day_model_1.default.find({});
         const existingCart = await cart_model_1.default.findOne({ userID });
         const cartProductCount = existingCart ? existingCart.productID.length : 0;
-        if (products.length === 0) {
-            return res.status(404).json({ message: "No products found!" });
-        }
         return res.status(200).json({
             products,
             homebanner,

@@ -63,7 +63,6 @@ router.post("/login", async (req: Request, res: Response) => {
   const { email, password } = req.body;
 
   try {
-    console.log(password);
     const user = await signupModel.findOne({ email: email });
 
     if (user) {
@@ -78,12 +77,13 @@ router.post("/login", async (req: Request, res: Response) => {
 
           jwt.sign(
             payload,
-            process.env.JWT_SECRET_KEY ?? "",
+            process.env.JWT_SECRET_KEY ?? "JWT_SECRET_KEY",
 
             (err, token) => {
               if (err) {
-                console.error(err);
-                return res.status(500).json({ msg: "Error generating token" });
+                return res
+                  .status(500)
+                  .json({ msg: "Error generating token" + err });
               } else {
                 return res.status(200).json({
                   token,
@@ -106,7 +106,6 @@ router.post("/login", async (req: Request, res: Response) => {
       return res.status(404).json({ msg: "User not found" });
     }
   } catch (error) {
-    console.error(error);
     return res.status(500).json({ msg: "Server error" });
   }
 });
@@ -133,8 +132,6 @@ router.post("/adminLogin", async (req: Request, res: Response) => {
 
             (err, token) => {
               if (err) {
-                console.error(err);
-                console.log("TTr" + err);
                 return res.status(500).json({ msg: "Error generating token" });
               } else {
                 return res.status(200).json({
@@ -156,7 +153,6 @@ router.post("/adminLogin", async (req: Request, res: Response) => {
       return res.status(404).json({ msg: "User not found" });
     }
   } catch (error) {
-    console.error(error);
     return res.status(500).json({ msg: "Server error" });
   }
 });
