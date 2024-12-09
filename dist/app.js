@@ -15,10 +15,14 @@ const upload_data_route_1 = __importDefault(require("./routes/upload_data.route"
 const cart_route_1 = __importDefault(require("./routes/cart.route"));
 dotenv_1.default.config();
 const password = process.env.MONGO_PASSWORD;
- const connectionString = `mongodb+srv://Youshah4499:${password}@zibzo.tqwnn.mongodb.net/zibzo_server?retryWrites=true&w=majority&appName=ZibZo`;
-mongoose_1.default.connect(connectionString);
-mongoose_1.default.connection.on("open", () => {
-    console.log("Onlineshoppingdb connected successfully !");
+const connectionString = `mongodb+srv://Youshah4499:${password}@zibzo.tqwnn.mongodb.net/zibzo_server?retryWrites=true&w=majority&appName=ZibZo`;
+mongoose_1.default
+    .connect(connectionString)
+    .then(() => {
+    console.log("Connected to MongoDB successfully!");
+})
+    .catch((err) => {
+    console.error("Error connecting to MongoDB:", err);
 });
 var app = (0, express_1.default)();
 app.use((_req, res, next) => {

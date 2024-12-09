@@ -25,7 +25,7 @@ const upload = multer({ storage: storage });
 //Product Data Upload
 router.post("/", upload.array("ProductImage", 10), async (req, res) => {
     try {
-        console.log(req.body);
+        console.log("BODY" + req.body);
         const newProductFromRequest = req.body;
         const imagePaths = req.files.map((file) => file.filename);
         console.log(newProductFromRequest);
