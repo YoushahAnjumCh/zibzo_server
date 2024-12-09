@@ -31,7 +31,6 @@ router.post(
   upload.array("ProductImage", 10),
   async (req: any, res: any) => {
     try {
-      console.log("BODY" + req.body);
       const newProductFromRequest = req.body;
       const imagePaths = req.files.map((file: any) => file.filename);
       console.log(newProductFromRequest);
