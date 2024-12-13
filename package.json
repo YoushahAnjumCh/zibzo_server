@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "start": "nodemon dist/app.js"
+    "build": "tsc", 
+    "start": "node dist/app.js"
   },
   "dependencies": {
     "@types/bcrypt": "^5.0.0",
