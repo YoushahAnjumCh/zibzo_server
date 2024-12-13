@@ -4,16 +4,18 @@ export interface ISignup extends Document {
   email: string;
   password: string;
   createdAt: Date;
-  firstName: string;
-  lastName: string;
+  userName: string;
+  userImage: string;
+  uid: Number;
 }
 
 const signupSchema: Schema = new Schema({
   email: { type: String },
   password: { type: String },
   createdAt: { type: Date, default: Date.now },
-  firstName: { type: String },
-  lastName: { type: String },
+  uid: { type: Number },
+  userName: { type: String },
+  userImage: { type: String },
   mobile: { type: Number },
 });
 
@@ -26,6 +28,6 @@ signupSchema.pre("save", async function (next) {
   next();
 });
 
-const signupModel = mongoose.model<ISignup>("Signup", signupSchema);
+const signupModel = mongoose.model<ISignup>("signup", signupSchema);
 
 export default signupModel;

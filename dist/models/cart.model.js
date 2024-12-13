@@ -34,23 +34,9 @@ var __importStar = (this && this.__importStar) || (function () {
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = __importStar(require("mongoose"));
-const bcrypt = require("bcrypt");
-const signupSchema = new mongoose_1.Schema({
-    email: { type: String },
-    password: { type: String },
-    createdAt: { type: Date, default: Date.now },
-    uid: { type: Number },
-    userName: { type: String },
-    userImage: { type: String },
-    mobile: { type: Number },
+const cartSchema = new mongoose_1.Schema({
+    userID: { type: String, required: true },
+    productID: { type: [], required: true },
 });
-// Add a pre-save hook to hash the password
-signupSchema.pre("save", async function (next) {
-    if (this.isModified("password") || this.isNew) {
-        const salt = await bcrypt.genSalt(10);
-        this.password = await bcrypt.hash(this.password, salt);
-    }
-    next();
-});
-const signupModel = mongoose_1.default.model("signup", signupSchema);
-exports.default = signupModel;
+const cartModel = mongoose_1.default.model("cart", cartSchema);
+exports.default = cartModel;

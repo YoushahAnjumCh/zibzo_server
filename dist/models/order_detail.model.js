@@ -12,16 +12,14 @@ const metaSchema = new Schema({
     qrCode: String,
 });
 // Define the main product schema
-const productSchema = new Schema({
-    id: { type: Number },
-    title: { type: String, required: true },
-    subtitle: { type: String, required: true },
-    category: { type: String, required: true },
-    image: { type: [], required: true },
-    offerPrice: { type: Number, required: true },
-    actualPrice: { type: Number, required: true },
-    offerPercentage: { type: Number, required: true },
-    stock: { type: Number },
+const orderDetailsSchema = new Schema({
+    id: { type: Number, required: true },
+    title: { type: String, },
+    userid: { type: Number, required: true },
+    category: { type: String, },
+    price: { type: Number, },
+    discountPercentage: { type: Number, },
+    stock: { type: Number, },
     brand: String,
     sku: String,
     warrantyInformation: String,
@@ -31,6 +29,5 @@ const productSchema = new Schema({
     meta: metaSchema,
     thumbnail: String,
 });
-// Create the product model
-const Product = mongoose_1.default.model("products", productSchema);
-exports.default = Product;
+const OrderDetails = mongoose_1.default.model("order_detail", orderDetailsSchema);
+exports.default = OrderDetails;
