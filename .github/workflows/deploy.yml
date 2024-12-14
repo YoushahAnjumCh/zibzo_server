@@ -76,18 +76,26 @@ jobs:
           until [[ "$status" == "live" || "$status" == "failed" ]]; do
             # Make an API call to Render to get the service status
             response=$(curl -s -H "Authorization: Bearer $api_key" \
-                             "https://api.render.com/v1/services/$service_id" | jq -r '.service.status')
+                             "https://api.render.com/v1/services/$service_id")
 
-            echo "Current deployment status: $response"
-            
-            if [[ "$response" == "live" ]]; then
+            # Output the entire response for debugging purposes
+            echo "Full response: $response"
+
+            # Extract status from the response
+            status=$(echo "$response" | jq -r '.service.status')
+
+            # Check if deployment is live or failed
+            if [[ "$status" == "live" ]]; then
               echo "Deployment is live!"
               break
-            elif [[ "$response" == "failed" ]]; then
+            elif [[ "$status" == "failed" ]]; then
               echo "Deployment failed."
               exit 1  # Fail the job if deployment fails
             fi
-            
+
+            # Output the current deployment status
+            echo "Current deployment status: $status"
+
             # Wait for 10 seconds before checking again
             sleep 10
           done
