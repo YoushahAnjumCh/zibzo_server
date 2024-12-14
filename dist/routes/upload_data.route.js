@@ -9,7 +9,6 @@ const banner_model_1 = __importDefault(require("../models/banner_model"));
 const category_model_1 = __importDefault(require("../models/category.model"));
 const offer_banner_model_1 = __importDefault(require("../models/offer_banner.model"));
 const deal_of_the_day_model_1 = __importDefault(require("../models/deal_of_the_day.model"));
-const circularJSON = require("circular-json");
 var router = (0, express_1.default)();
 const fs = require("fs");
 const multer = require("multer");
