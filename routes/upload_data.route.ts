@@ -6,9 +6,20 @@ import categoryModel from "../models/category.model";
 import offerbannerModel from "../models/offer_banner.model";
 import dealOfTheDayModel from "../models/deal_of_the_day.model";
 var router = express();
-
+const fs = require("fs");
 const multer = require("multer");
 const path = require("path");
+const bodyParser = require("body-parser");
+var app = express();
+
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
+
+// Ensure the images folder exists
+const imagesDir = path.join(__dirname, "images");
+if (!fs.existsSync(imagesDir)) {
+  fs.mkdirSync(imagesDir);
+}
 
 // Configure storage for multer
 const storage = multer.diskStorage({
@@ -23,7 +34,10 @@ const storage = multer.diskStorage({
   },
 });
 
-const upload = multer({ storage: storage });
+const upload = multer({
+  storage: storage,
+  limits: { fileSize: 50 * 1024 * 1024 },
+});
 
 //Product Data Upload
 router.post(
@@ -53,13 +67,30 @@ router.post(
 );
 
 // HomeBanner Upload
+const safeLog = (object: any) => {
+  try {
+    return JSON.stringify(object, (key, value) => {
+      // Remove unwanted circular references or complex objects
+      if (key === "socket" || key === "parser") {
+        return undefined; // This will prevent circular references
+      }
+      return value;
+    });
+  } catch (e) {
+    return "Error: Could not stringify object";
+  }
+};
 
 router.post(
   "/homebanner",
   upload.single("homebanner"),
   async (req: any, res: any) => {
     try {
+      if (!req.file) {
+        return res.status(400).json({ message: "Upload image" });
+      }
       const newProductFromRequest = req.body;
+
       const imagePath = req.file ? req.file.filename : null;
       newProductFromRequest.image = imagePath;
 
@@ -68,13 +99,12 @@ router.post(
         ProductImage: imagePath,
       });
 
-      console.log(newProductToBeInserted);
       await newProductToBeInserted.save();
 
       return res.status(201).json(newProductToBeInserted);
     } catch (error) {
       console.error(error);
-      res.status(500).json({ message: "Something went wrong!" });
+      res.status(500).json({ message: "Internal Server Error", error: error });
     }
   }
 );

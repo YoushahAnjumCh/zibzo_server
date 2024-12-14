@@ -9,9 +9,20 @@ const banner_model_1 = __importDefault(require("../models/banner_model"));
 const category_model_1 = __importDefault(require("../models/category.model"));
 const offer_banner_model_1 = __importDefault(require("../models/offer_banner.model"));
 const deal_of_the_day_model_1 = __importDefault(require("../models/deal_of_the_day.model"));
+const circularJSON = require("circular-json");
 var router = (0, express_1.default)();
+const fs = require("fs");
 const multer = require("multer");
 const path = require("path");
+const bodyParser = require("body-parser");
+var app = (0, express_1.default)();
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
+// Ensure the images folder exists
+const imagesDir = path.join(__dirname, "images");
+if (!fs.existsSync(imagesDir)) {
+    fs.mkdirSync(imagesDir);
+}
 // Configure storage for multer
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
@@ -21,7 +32,10 @@ const storage = multer.diskStorage({
         cb(null, file.fieldname + "_" + Date.now() + path.extname(file.originalname));
     },
 });
-const upload = multer({ storage: storage });
+const upload = multer({
+    storage: storage,
+    limits: { fileSize: 50 * 1024 * 1024 },
+});
 //Product Data Upload
 router.post("/", upload.array("ProductImage", 10), async (req, res) => {
     try {
@@ -40,19 +54,35 @@ router.post("/", upload.array("ProductImage", 10), async (req, res) => {
     }
 });
 // HomeBanner Upload
+const safeLog = (object) => {
+    try {
+        return JSON.stringify(object, (key, value) => {
+            // Remove unwanted circular references or complex objects
+            if (key === "socket" || key === "parser") {
+                return undefined; // This will prevent circular references
+            }
+            return value;
+        });
+    }
+    catch (e) {
+        return "Error: Could not stringify object";
+    }
+};
 router.post("/homebanner", upload.single("homebanner"), async (req, res) => {
     try {
+        if (!req.file) {
+            return res.status(400).json({ message: req });
+        }
         const newProductFromRequest = req.body;
         const imagePath = req.file ? req.file.filename : null;
         newProductFromRequest.image = imagePath;
         const newProductToBeInserted = new banner_model_1.default(Object.assign(Object.assign({}, newProductFromRequest), { ProductImage: imagePath }));
-        console.log(newProductToBeInserted);
         await newProductToBeInserted.save();
         return res.status(201).json(newProductToBeInserted);
     }
     catch (error) {
         console.error(error);
-        res.status(500).json({ message: "Something went wrong!" });
+        res.status(500).json({ message: "Internal Server Error", error: error });
     }
 });
 //Category Upload
