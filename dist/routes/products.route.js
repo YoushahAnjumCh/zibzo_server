@@ -8,25 +8,115 @@ const product_model_1 = __importDefault(require("../models/product.model"));
 const banner_model_1 = __importDefault(require("../models/banner_model"));
 const cart_model_1 = __importDefault(require("../models/cart.model"));
 const auth_middleware_1 = require("../middleware/auth.middleware");
+const dotenv_1 = __importDefault(require("dotenv"));
 const category_model_1 = __importDefault(require("../models/category.model"));
 const offer_banner_model_1 = __importDefault(require("../models/offer_banner.model"));
 const deal_of_the_day_model_1 = __importDefault(require("../models/deal_of_the_day.model"));
 const mongoose_1 = __importDefault(require("mongoose"));
+const client_s3_1 = require("@aws-sdk/client-s3");
+const s3_request_presigner_1 = require("@aws-sdk/s3-request-presigner");
+dotenv_1.default.config();
+const bucketName = process.env.BUCKET_NAME;
+const bucketRegion = process.env.BUCKET_REGION;
+const accessKey = process.env.ACCESS_KEY;
+const secretKey = process.env.SECRET_KEY;
+const s3 = new client_s3_1.S3Client({
+    credentials: {
+        accessKeyId: accessKey || "",
+        secretAccessKey: secretKey || "",
+    },
+    region: bucketRegion || "",
+});
 var router = (0, express_1.default)();
-router.get("/", async (req, res) => {
+router.get("/", auth_middleware_1.isAuthenticated, async (req, res) => {
     try {
-        const { 
-        // limit, offset,
-        userID, } = req.query;
+        const { userID } = req.query;
         const products = await product_model_1.default.find({});
-        // .limit(parseInt(limit as string))
-        // .skip(parseInt(offset as string))
+        for (let product of products) {
+            const imageUrls = [];
+            for (const imageKey of product.image) {
+                const getObjectParam = {
+                    Bucket: bucketName,
+                    Key: imageKey,
+                };
+                const command = new client_s3_1.GetObjectCommand(getObjectParam);
+                // Generate signed URL for each image
+                const signedUrl = await (0, s3_request_presigner_1.getSignedUrl)(s3, command, { expiresIn: 3600 });
+                imageUrls.push(signedUrl);
+            }
+            // Replace the images array with signed URLs
+            product.image = imageUrls;
+        }
         const homebanner = await banner_model_1.default.find({});
+        for (let homebannerimage of homebanner) {
+            const getObjectHomeBannerParams = {
+                Bucket: bucketName,
+                Key: homebannerimage.image,
+            };
+            const commandHomeBanner = new client_s3_1.GetObjectCommand(getObjectHomeBannerParams);
+            const homeBannerImage = await (0, s3_request_presigner_1.getSignedUrl)(s3, commandHomeBanner, {
+                expiresIn: 3600,
+            });
+            homebannerimage.image = homeBannerImage;
+        }
         const category = await category_model_1.default.find({});
+        // Update category images with signed URLs
+        for (let categories of category) {
+            const getObjectCategoryParams = {
+                Bucket: bucketName,
+                Key: categories.image,
+            };
+            const commandCategory = new client_s3_1.GetObjectCommand(getObjectCategoryParams);
+            const categoryImage = await (0, s3_request_presigner_1.getSignedUrl)(s3, commandCategory, {
+                expiresIn: 3600,
+            });
+            categories.image = categoryImage;
+        }
         const offerbanner = await offer_banner_model_1.default.find({});
+        // Update offerBanner images with signed URLs
+        for (let offerbannerImage of offerbanner) {
+            const getObjectOfferBannerParams = {
+                Bucket: bucketName,
+                Key: offerbannerImage.image,
+            };
+            const commandOfferBanner = new client_s3_1.GetObjectCommand(getObjectOfferBannerParams);
+            const offerBannerImage = await (0, s3_request_presigner_1.getSignedUrl)(s3, commandOfferBanner, {
+                expiresIn: 3600,
+            });
+            offerbannerImage.image = offerBannerImage;
+        }
         const offerdeal = await deal_of_the_day_model_1.default.find({});
+        // Update offerdeal images with signed URLs
+        for (let offerDeal of offerdeal) {
+            // Generate a pre-signed URL for the image
+            if (offerDeal.image) {
+                const getObjectParamsImage = {
+                    Bucket: bucketName,
+                    Key: offerDeal.image,
+                };
+                const commandImage = new client_s3_1.GetObjectCommand(getObjectParamsImage);
+                const dealDayImage = await (0, s3_request_presigner_1.getSignedUrl)(s3, commandImage, {
+                    expiresIn: 3600,
+                });
+                offerDeal.image = dealDayImage; // Replace the image key with the pre-signed URL
+            }
+            // Generate a pre-signed URL for the logo
+            if (offerDeal.logo) {
+                const getObjectParamsLogo = {
+                    Bucket: bucketName,
+                    Key: offerDeal.logo,
+                };
+                const commandLogo = new client_s3_1.GetObjectCommand(getObjectParamsLogo);
+                const dealDayLogo = await (0, s3_request_presigner_1.getSignedUrl)(s3, commandLogo, {
+                    expiresIn: 3600,
+                });
+                offerDeal.logo = dealDayLogo; // Replace the logo key with the pre-signed URL
+            }
+        }
+        // Get cart product count for the user
         const existingCart = await cart_model_1.default.findOne({ userID });
         const cartProductCount = existingCart ? existingCart.productID.length : 0;
+        // Respond with all data
         return res.status(200).json({
             products,
             homebanner,

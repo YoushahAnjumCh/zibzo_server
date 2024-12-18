@@ -1,11 +1,18 @@
-import mongoose, { Schema, Document, Number } from "mongoose";
+import mongoose, { Schema, Document } from "mongoose";
 
-const categorySchema: Schema = new Schema({
+// Define a TypeScript interface for the Category document
+interface ICategory extends Document {
+  image: string;
+  title: string;
+  id?: number;
+}
+
+const categorySchema: Schema<ICategory> = new Schema({
   image: { type: String, required: true },
   title: { type: String, required: true },
   id: { type: Number },
 });
 
-const categoryModel = mongoose.model("category", categorySchema);
+const CategoryModel = mongoose.model<ICategory>("category", categorySchema);
 
-export default categoryModel;
+export default CategoryModel;

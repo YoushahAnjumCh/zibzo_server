@@ -17,7 +17,7 @@ const productSchema = new Schema({
     title: { type: String, required: true },
     subtitle: { type: String, required: true },
     category: { type: String, required: true },
-    image: { type: [], required: true },
+    image: { type: [String], required: true },
     offerPrice: { type: Number, required: true },
     actualPrice: { type: Number, required: true },
     offerPercentage: { type: Number, required: true },

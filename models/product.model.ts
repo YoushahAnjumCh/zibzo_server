@@ -7,13 +7,13 @@ const metaSchema = new Schema({
   qrCode: String,
 });
 
-// Define the main product schema
 const productSchema = new Schema({
   id: { type: Number },
   title: { type: String, required: true },
   subtitle: { type: String, required: true },
   category: { type: String, required: true },
-  image: { type: [], required: true },
+  image: { type: [String], required: true },
+
   offerPrice: { type: Number, required: true },
   actualPrice: { type: Number, required: true },
   offerPercentage: { type: Number, required: true },
@@ -28,7 +28,6 @@ const productSchema = new Schema({
   thumbnail: String,
 });
 
-// Create the product model
 const Product = mongoose.model("products", productSchema);
 
 export default Product;
