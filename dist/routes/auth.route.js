@@ -91,7 +91,8 @@ router.post("/login", async (req, res) => {
         }
     }
     catch (error) {
-        return res.status(500).json({ msg: "Server error" });
+        console.error("Error during login:", error);
+        return res.status(500).json({ msg: "Server error", error: error });
     }
 });
 //Admin login
@@ -135,7 +136,8 @@ router.post("/adminLogin", async (req, res) => {
         }
     }
     catch (error) {
-        return res.status(500).json({ msg: "Server error" });
+        console.error("Error during login:", error);
+        return res.status(500).json({ msg: "Server error", error: error });
     }
 });
 exports.default = router;
