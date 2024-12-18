@@ -11,7 +11,6 @@ const metaSchema = new Schema({
     barcode: String,
     qrCode: String,
 });
-// Define the main product schema
 const productSchema = new Schema({
     id: { type: Number },
     title: { type: String, required: true },
@@ -31,6 +30,5 @@ const productSchema = new Schema({
     meta: metaSchema,
     thumbnail: String,
 });
-// Create the product model
 const Product = mongoose_1.default.model("products", productSchema);
 exports.default = Product;

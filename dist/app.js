@@ -26,17 +26,20 @@ mongoose_1.default
     console.error("Error connecting to MongoDB:", err);
 });
 var app = (0, express_1.default)();
-app.use((0, cors_1.default)({ origin: "https://zibzo.youshah.com" }));
-app.use((0, cors_1.default)()); // This will allow all origins by default
+const allowedOrigins = ["http://localhost:3000", "https://zibzo.youshah.com"];
+app.use((req, res, next) => {
+    const origin = req.headers.origin;
+    if (origin && allowedOrigins.includes(origin)) {
+        res.header("Access-Control-Allow-Origin", origin);
+    }
+    res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, PATCH, OPTIONS");
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
+    next();
+});
+app.use((0, cors_1.default)());
 // Middleware for parsing requests
 app.use(body_parser_1.default.json());
 app.use(body_parser_1.default.urlencoded({ extended: true }));
-// Ensure the CORS middleware is applied before other middleware
-app.use((_req, res, next) => {
-    res.header("Access-Control-Allow-Origin", "*"); // Or specify a particular domain here, e.g., "http://localhost:3000"
-    res.header("Access-Control-Allow-Headers", "*");
-    next();
-});
 app.use(body_parser_1.default.json({ limit: "50mb" })); // Increase the limit for JSON requests
 app.use(body_parser_1.default.urlencoded({ limit: "50mb", extended: true })); // Increase for URL-encoded requests
 app.use(express_1.default.json());

@@ -32,8 +32,8 @@ const s3 = new client_s3_1.S3Client({
     maxAttempts: 5, // Retry on failure for a number of attempts
     requestHandler: {
         httpOptions: {
-            timeout: 300000, // Request timeout in milliseconds (5 minutes)
-            maxRedirects: 10, // Optional: Number of allowed redirects
+            timeout: 300000,
+            maxRedirects: 10,
         },
     },
 });
@@ -65,10 +65,8 @@ async (req, res) => {
             };
             const command = new client_s3_1.PutObjectCommand(uploadParams);
             await s3.send(command);
-            // Push the S3 image key to the array
             imagePaths.push(imageName);
         }
-        // Store the S3 image keys in the database
         const newProductToBeInserted = new product_model_1.default(Object.assign(Object.assign({}, newProductFromRequest), { image: imagePaths }));
         await newProductToBeInserted.save();
         return res.status(201).json(newProductToBeInserted);
@@ -83,7 +81,6 @@ router.post("/homebanner", upload.single("homebanner"), async (req, res) => {
         if (!req.file) {
             return res.status(400).json({ message: "Upload image" });
         }
-        // Generate a unique name for the homebanner image
         const homeBannerImageName = randomImageName();
         const uploadHomeBannerParams = {
             Bucket: bucketName,
@@ -159,10 +156,8 @@ router.post("/dealday", upload.fields([
                 .status(400)
                 .json({ message: "Please upload both image and logo" });
         }
-        // Generate random names for the files
-        const dealDayImageName = randomImageName(); // New name for the dealofthedayimage
-        const dealDayLogoName = randomImageName(); // New name for the dealofthedaylogo
-        // Upload dealofthedayimage to S3
+        const dealDayImageName = randomImageName();
+        const dealDayLogoName = randomImageName();
         const imageFile = req.files.dealofthedayimage[0];
         const uploadParamsImage = {
             Bucket: bucketName,
@@ -172,7 +167,6 @@ router.post("/dealday", upload.fields([
         };
         const commandImage = new client_s3_1.PutObjectCommand(uploadParamsImage);
         await s3.send(commandImage);
-        // Upload dealofthedaylogo to S3
         const logoFile = req.files.dealofthedaylogo[0];
         const uploadParamsLogo = {
             Bucket: bucketName,
@@ -182,11 +176,10 @@ router.post("/dealday", upload.fields([
         };
         const commandLogo = new client_s3_1.PutObjectCommand(uploadParamsLogo);
         await s3.send(commandLogo);
-        // Save the deal of the day product to the database
         const newProduct = new deal_of_the_day_model_1.default({
-            image: dealDayImageName, // S3 key for the image
+            image: dealDayImageName,
             title: req.body.title,
-            logo: dealDayLogoName, // S3 key for the logo
+            logo: dealDayLogoName,
             offer: req.body.offer,
         });
         const savedProduct = await newProduct.save();

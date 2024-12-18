@@ -40,11 +40,9 @@ router.get("/", auth_middleware_1.isAuthenticated, async (req, res) => {
                     Key: imageKey,
                 };
                 const command = new client_s3_1.GetObjectCommand(getObjectParam);
-                // Generate signed URL for each image
                 const signedUrl = await (0, s3_request_presigner_1.getSignedUrl)(s3, command, { expiresIn: 3600 });
                 imageUrls.push(signedUrl);
             }
-            // Replace the images array with signed URLs
             product.image = imageUrls;
         }
         const homebanner = await banner_model_1.default.find({});
@@ -98,7 +96,7 @@ router.get("/", auth_middleware_1.isAuthenticated, async (req, res) => {
                 const dealDayImage = await (0, s3_request_presigner_1.getSignedUrl)(s3, commandImage, {
                     expiresIn: 3600,
                 });
-                offerDeal.image = dealDayImage; // Replace the image key with the pre-signed URL
+                offerDeal.image = dealDayImage;
             }
             // Generate a pre-signed URL for the logo
             if (offerDeal.logo) {
@@ -110,7 +108,7 @@ router.get("/", auth_middleware_1.isAuthenticated, async (req, res) => {
                 const dealDayLogo = await (0, s3_request_presigner_1.getSignedUrl)(s3, commandLogo, {
                     expiresIn: 3600,
                 });
-                offerDeal.logo = dealDayLogo; // Replace the logo key with the pre-signed URL
+                offerDeal.logo = dealDayLogo;
             }
         }
         // Get cart product count for the user

@@ -34,12 +34,10 @@ var __importStar = (this && this.__importStar) || (function () {
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = __importStar(require("mongoose"));
-// Create a schema tightly coupled with the interface
 const categorySchema = new mongoose_1.Schema({
     image: { type: String, required: true },
     title: { type: String, required: true },
-    id: { type: Number, default: null }, // Optional with default value
+    id: { type: Number },
 });
-// Create the model tightly coupled with the schema and interface
-const CategoryModel = mongoose_1.default.model("Category", categorySchema);
+const CategoryModel = mongoose_1.default.model("category", categorySchema);
 exports.default = CategoryModel;
