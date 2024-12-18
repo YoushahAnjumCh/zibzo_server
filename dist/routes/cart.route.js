@@ -7,11 +7,27 @@ const express_1 = __importDefault(require("express"));
 const cart_model_1 = __importDefault(require("../models/cart.model"));
 const product_model_1 = __importDefault(require("../models/product.model"));
 const cors_1 = __importDefault(require("cors"));
+const dotenv_1 = __importDefault(require("dotenv"));
+const client_s3_1 = require("@aws-sdk/client-s3");
+const s3_request_presigner_1 = require("@aws-sdk/s3-request-presigner");
+const auth_middleware_1 = require("../middleware/auth.middleware");
+dotenv_1.default.config();
+const bucketName = process.env.BUCKET_NAME;
+const bucketRegion = process.env.BUCKET_REGION;
+const accessKey = process.env.ACCESS_KEY;
+const secretKey = process.env.SECRET_KEY;
+const s3 = new client_s3_1.S3Client({
+    credentials: {
+        accessKeyId: accessKey || "",
+        secretAccessKey: secretKey || "",
+    },
+    region: bucketRegion || "",
+});
 const app = (0, express_1.default)();
 app.use((0, cors_1.default)());
 app.use(express_1.default.json());
 // Cart Routes
-app.post("/", async (req, res) => {
+app.post("/", auth_middleware_1.isAuthenticated, async (req, res) => {
     try {
         const { userID, productID } = req.body;
         if (!userID || !productID) {
@@ -51,7 +67,7 @@ app.post("/", async (req, res) => {
         res.status(500).json({ message: "Something went wrong!" });
     }
 });
-app.get("/", async (req, res) => {
+app.get("/", auth_middleware_1.isAuthenticated, async (req, res) => {
     try {
         const { userID } = req.query;
         if (!userID) {
@@ -71,6 +87,19 @@ app.get("/", async (req, res) => {
         const products = await product_model_1.default.find({
             _id: { $in: existingCart.productID },
         });
+        for (let product of products) {
+            const imageUrls = [];
+            for (const imageKey of product.image) {
+                const getObjectParam = {
+                    Bucket: bucketName,
+                    Key: imageKey,
+                };
+                const command = new client_s3_1.GetObjectCommand(getObjectParam);
+                const signedUrl = await (0, s3_request_presigner_1.getSignedUrl)(s3, command, { expiresIn: 3600 });
+                imageUrls.push(signedUrl);
+            }
+            product.image = imageUrls;
+        }
         if (products.length === 0) {
             return res.status(404).json({ message: "No matching products found!" });
         }
@@ -84,10 +113,9 @@ app.get("/", async (req, res) => {
         res.status(500).json({ message: "Something went wrong!" });
     }
 });
-app.delete("/", async (req, res) => {
+app.delete("/", auth_middleware_1.isAuthenticated, async (req, res) => {
     try {
         const { userID, productID } = req.body;
-        console.log(userID);
         const cart = await cart_model_1.default.findOne({ userID });
         if (!cart) {
             return res.status(404).json({ message: "Cart not found for this user!" });
@@ -105,6 +133,19 @@ app.delete("/", async (req, res) => {
         const products = await product_model_1.default.find({
             _id: { $in: cart.productID },
         });
+        for (let product of products) {
+            const imageUrls = [];
+            for (const imageKey of product.image) {
+                const getObjectParam = {
+                    Bucket: bucketName,
+                    Key: imageKey,
+                };
+                const command = new client_s3_1.GetObjectCommand(getObjectParam);
+                const signedUrl = await (0, s3_request_presigner_1.getSignedUrl)(s3, command, { expiresIn: 3600 });
+                imageUrls.push(signedUrl);
+            }
+            product.image = imageUrls;
+        }
         if (products.length === 0) {
             return res.status(404).json({ message: "No matching products found!" });
         }

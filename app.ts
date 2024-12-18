@@ -25,20 +25,28 @@ mongoose
   });
 
 var app = express();
-
-app.use(cors({ origin: "https://zibzo.youshah.com" }));
-app.use(cors()); // This will allow all origins by default
+const allowedOrigins = ["http://localhost:3000", "https://zibzo.youshah.com"];
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
+  if (origin && allowedOrigins.includes(origin)) {
+    res.header("Access-Control-Allow-Origin", origin);
+  }
+  res.header(
+    "Access-Control-Allow-Methods",
+    "GET, POST, PUT, DELETE, PATCH, OPTIONS"
+  );
+  res.header(
+    "Access-Control-Allow-Headers",
+    "Origin, X-Requested-With, Content-Type, Accept, Authorization"
+  );
+  next();
+});
+app.use(cors());
 
 // Middleware for parsing requests
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-// Ensure the CORS middleware is applied before other middleware
-app.use((_req, res, next) => {
-  res.header("Access-Control-Allow-Origin", "*"); // Or specify a particular domain here, e.g., "http://localhost:3000"
-  res.header("Access-Control-Allow-Headers", "*");
-  next();
-});
 app.use(bodyParser.json({ limit: "50mb" })); // Increase the limit for JSON requests
 app.use(bodyParser.urlencoded({ limit: "50mb", extended: true })); // Increase for URL-encoded requests
 
@@ -47,7 +55,6 @@ app.use(express.urlencoded({ extended: false }));
 app.use(express.static("images"));
 
 app.use("/upload", uploadRouter);
-
 app.use("/auth", authRouter);
 app.use("/products", productRouter);
 app.use("/wishlist", wishlistRouter);

@@ -2,6 +2,24 @@ import express, { Request, Response } from "express";
 import cartModel from "../models/cart.model";
 import productsModel from "../models/product.model";
 import cors from "cors";
+import dotenv from "dotenv";
+import { S3Client, GetObjectCommand } from "@aws-sdk/client-s3";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+import { isAuthenticated } from "../middleware/auth.middleware";
+
+dotenv.config();
+const bucketName = process.env.BUCKET_NAME;
+const bucketRegion = process.env.BUCKET_REGION;
+const accessKey = process.env.ACCESS_KEY;
+const secretKey = process.env.SECRET_KEY;
+
+const s3 = new S3Client({
+  credentials: {
+    accessKeyId: accessKey || "",
+    secretAccessKey: secretKey || "",
+  },
+  region: bucketRegion || "",
+});
 
 const app = express();
 
@@ -9,7 +27,7 @@ app.use(cors());
 app.use(express.json());
 
 // Cart Routes
-app.post("/", async (req: Request, res: Response) => {
+app.post("/", isAuthenticated, async (req: Request, res: Response) => {
   try {
     const { userID, productID } = req.body;
 
@@ -59,7 +77,7 @@ app.post("/", async (req: Request, res: Response) => {
   }
 });
 
-app.get("/", async (req: Request, res: Response) => {
+app.get("/", isAuthenticated, async (req: Request, res: Response) => {
   try {
     const { userID } = req.query;
 
@@ -84,6 +102,22 @@ app.get("/", async (req: Request, res: Response) => {
     const products = await productsModel.find({
       _id: { $in: existingCart.productID },
     });
+    for (let product of products) {
+      const imageUrls: string[] = [];
+
+      for (const imageKey of product.image) {
+        const getObjectParam = {
+          Bucket: bucketName,
+          Key: imageKey,
+        };
+        const command = new GetObjectCommand(getObjectParam);
+
+        const signedUrl = await getSignedUrl(s3, command, { expiresIn: 3600 });
+        imageUrls.push(signedUrl);
+      }
+
+      product.image = imageUrls;
+    }
 
     if (products.length === 0) {
       return res.status(404).json({ message: "No matching products found!" });
@@ -99,7 +133,7 @@ app.get("/", async (req: Request, res: Response) => {
   }
 });
 
-app.delete("/", async (req: Request, res: Response) => {
+app.delete("/", isAuthenticated, async (req: Request, res: Response) => {
   try {
     const { userID, productID } = req.body;
     const cart = await cartModel.findOne({ userID });
@@ -124,6 +158,21 @@ app.delete("/", async (req: Request, res: Response) => {
     const products = await productsModel.find({
       _id: { $in: cart.productID },
     });
+    for (let product of products) {
+      const imageUrls: string[] = [];
+
+      for (const imageKey of product.image) {
+        const getObjectParam = {
+          Bucket: bucketName,
+          Key: imageKey,
+        };
+        const command = new GetObjectCommand(getObjectParam);
+
+        const signedUrl = await getSignedUrl(s3, command, { expiresIn: 3600 });
+        imageUrls.push(signedUrl);
+      }
+      product.image = imageUrls;
+    }
 
     if (products.length === 0) {
       return res.status(404).json({ message: "No matching products found!" });
