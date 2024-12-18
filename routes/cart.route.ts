@@ -1,8 +1,6 @@
 import express, { Request, Response } from "express";
 import cartModel from "../models/cart.model";
 import productsModel from "../models/product.model";
-import http from "http";
-import { Server } from "socket.io"; // Use TypeScript-compatible socket.io
 import cors from "cors";
 
 const app = express();
@@ -104,7 +102,6 @@ app.get("/", async (req: Request, res: Response) => {
 app.delete("/", async (req: Request, res: Response) => {
   try {
     const { userID, productID } = req.body;
-    console.log(userID);
     const cart = await cartModel.findOne({ userID });
 
     if (!cart) {
