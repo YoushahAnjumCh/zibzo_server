@@ -9,13 +9,13 @@ const product_model_1 = __importDefault(require("../models/product.model"));
 const cors_1 = __importDefault(require("cors"));
 const dotenv_1 = __importDefault(require("dotenv"));
 const client_s3_1 = require("@aws-sdk/client-s3");
-const s3_request_presigner_1 = require("@aws-sdk/s3-request-presigner");
 const auth_middleware_1 = require("../middleware/auth.middleware");
 dotenv_1.default.config();
 const bucketName = process.env.BUCKET_NAME;
 const bucketRegion = process.env.BUCKET_REGION;
 const accessKey = process.env.ACCESS_KEY;
 const secretKey = process.env.SECRET_KEY;
+const cloudFrontDomain = process.env.CLOUDFRONT_DOMAIN;
 const s3 = new client_s3_1.S3Client({
     credentials: {
         accessKeyId: accessKey || "",
@@ -89,14 +89,11 @@ app.get("/", auth_middleware_1.isAuthenticated, async (req, res) => {
         });
         for (let product of products) {
             const imageUrls = [];
-            for (const imageKey of product.image) {
-                const getObjectParam = {
-                    Bucket: bucketName,
-                    Key: imageKey,
-                };
-                const command = new client_s3_1.GetObjectCommand(getObjectParam);
-                const signedUrl = await (0, s3_request_presigner_1.getSignedUrl)(s3, command, { expiresIn: 3600 });
-                imageUrls.push(signedUrl);
+            if (Array.isArray(product.image)) {
+                for (const imageKey of product.image) {
+                    const imageUrl = `${cloudFrontDomain}/${imageKey}`;
+                    imageUrls.push(imageUrl);
+                }
             }
             product.image = imageUrls;
         }
@@ -135,14 +132,11 @@ app.delete("/", auth_middleware_1.isAuthenticated, async (req, res) => {
         });
         for (let product of products) {
             const imageUrls = [];
-            for (const imageKey of product.image) {
-                const getObjectParam = {
-                    Bucket: bucketName,
-                    Key: imageKey,
-                };
-                const command = new client_s3_1.GetObjectCommand(getObjectParam);
-                const signedUrl = await (0, s3_request_presigner_1.getSignedUrl)(s3, command, { expiresIn: 3600 });
-                imageUrls.push(signedUrl);
+            if (Array.isArray(product.image)) {
+                for (const imageKey of product.image) {
+                    const imageUrl = `${cloudFrontDomain}/${imageKey}`;
+                    imageUrls.push(imageUrl);
+                }
             }
             product.image = imageUrls;
         }
