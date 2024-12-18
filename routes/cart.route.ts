@@ -12,6 +12,7 @@ const bucketName = process.env.BUCKET_NAME;
 const bucketRegion = process.env.BUCKET_REGION;
 const accessKey = process.env.ACCESS_KEY;
 const secretKey = process.env.SECRET_KEY;
+const cloudFrontDomain = process.env.CLOUDFRONT_DOMAIN;
 
 const s3 = new S3Client({
   credentials: {
@@ -105,15 +106,11 @@ app.get("/", isAuthenticated, async (req: Request, res: Response) => {
     for (let product of products) {
       const imageUrls: string[] = [];
 
-      for (const imageKey of product.image) {
-        const getObjectParam = {
-          Bucket: bucketName,
-          Key: imageKey,
-        };
-        const command = new GetObjectCommand(getObjectParam);
-
-        const signedUrl = await getSignedUrl(s3, command, { expiresIn: 3600 });
-        imageUrls.push(signedUrl);
+      if (Array.isArray(product.image)) {
+        for (const imageKey of product.image) {
+          const imageUrl = `${cloudFrontDomain}/${imageKey}`;
+          imageUrls.push(imageUrl);
+        }
       }
 
       product.image = imageUrls;
@@ -161,16 +158,13 @@ app.delete("/", isAuthenticated, async (req: Request, res: Response) => {
     for (let product of products) {
       const imageUrls: string[] = [];
 
-      for (const imageKey of product.image) {
-        const getObjectParam = {
-          Bucket: bucketName,
-          Key: imageKey,
-        };
-        const command = new GetObjectCommand(getObjectParam);
-
-        const signedUrl = await getSignedUrl(s3, command, { expiresIn: 3600 });
-        imageUrls.push(signedUrl);
+      if (Array.isArray(product.image)) {
+        for (const imageKey of product.image) {
+          const imageUrl = `${cloudFrontDomain}/${imageKey}`;
+          imageUrls.push(imageUrl);
+        }
       }
+
       product.image = imageUrls;
     }
 

@@ -10,7 +10,6 @@ import offerbannerModel from "../models/offer_banner.model";
 import dealoftheday from "../models/deal_of_the_day.model";
 import mongoose from "mongoose";
 import { S3Client, GetObjectCommand } from "@aws-sdk/client-s3";
-import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 dotenv.config();
 const bucketName = process.env.BUCKET_NAME;
 const bucketRegion = process.env.BUCKET_REGION;
