@@ -34,15 +34,12 @@ router.get("/", auth_middleware_1.isAuthenticated, async (req, res) => {
         const products = await product_model_1.default.find({});
         for (let product of products) {
             const imageUrls = [];
-            // Ensure product.image is an array of keys
             if (Array.isArray(product.image)) {
                 for (const imageKey of product.image) {
-                    // Generate CloudFront URL for each image key
                     const imageUrl = `${cloudFrontDomain}/${imageKey}`;
                     imageUrls.push(imageUrl);
                 }
             }
-            // Update the product's image field with the URLs
             product.image = imageUrls;
         }
         const homebanner = await banner_model_1.default.find({});
@@ -50,24 +47,20 @@ router.get("/", auth_middleware_1.isAuthenticated, async (req, res) => {
             homebannerimage.image = `${cloudFrontDomain}/${homebannerimage.image}`;
         }
         const category = await category_model_1.default.find({});
-        // Update category images with signed URLs
         for (let categories of category) {
             if (categories.image) {
                 categories.image = `${cloudFrontDomain}/${categories.image}`;
             }
         }
         const offerbanner = await offer_banner_model_1.default.find({});
-        // Update offerBanner images with signed URLs
         for (let offerbannerImage of offerbanner) {
             offerbannerImage.image = `${cloudFrontDomain}/${offerbannerImage.image}`;
         }
         const offerdeal = await deal_of_the_day_model_1.default.find({});
-        // Update offerdeal images with signed URLs
         for (let offerDeal of offerdeal) {
             offerDeal.image = `${cloudFrontDomain}/${offerDeal.image}`;
             offerDeal.logo = `${cloudFrontDomain}/${offerDeal.logo}`;
         }
-        // Get cart product count for the user
         const existingCart = await cart_model_1.default.findOne({ userID });
         const cartProductCount = existingCart ? existingCart.productID.length : 0;
         // Respond with all data

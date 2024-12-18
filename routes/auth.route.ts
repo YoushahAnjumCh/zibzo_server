@@ -106,7 +106,8 @@ router.post("/login", async (req: Request, res: Response) => {
       return res.status(404).json({ msg: "User not found" });
     }
   } catch (error) {
-    return res.status(500).json({ msg: "Server error" });
+    console.error("Error during login:", error);
+    return res.status(500).json({ msg: "Server error", error: error });
   }
 });
 
@@ -153,7 +154,8 @@ router.post("/adminLogin", async (req: Request, res: Response) => {
       return res.status(404).json({ msg: "User not found" });
     }
   } catch (error) {
-    return res.status(500).json({ msg: "Server error" });
+    console.error("Error during login:", error);
+    return res.status(500).json({ msg: "Server error", error: error });
   }
 });
 
