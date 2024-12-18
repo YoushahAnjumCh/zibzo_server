@@ -16,7 +16,8 @@ const cart_route_1 = __importDefault(require("./routes/cart.route"));
 const body_parser_1 = __importDefault(require("body-parser"));
 dotenv_1.default.config();
 const password = process.env.MONGO_PASSWORD;
-const connectionString = `mongodb+srv://Youshah4499:${password}@zibzo.tqwnn.mongodb.net/zibzo_server?retryWrites=true&w=majority&appName=ZibZo`;
+// const connectionString = `mongodb+srv://Youshah4499:${password}@zibzo.tqwnn.mongodb.net/zibzo_server?retryWrites=true&w=majority&appName=ZibZo`;
+const connectionString = `mongodb://localhost:27017/zibzo_server`;
 mongoose_1.default
     .connect(connectionString)
     .then(() => {

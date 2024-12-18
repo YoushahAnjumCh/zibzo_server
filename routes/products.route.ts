@@ -16,6 +16,7 @@ const bucketName = process.env.BUCKET_NAME;
 const bucketRegion = process.env.BUCKET_REGION;
 const accessKey = process.env.ACCESS_KEY;
 const secretKey = process.env.SECRET_KEY;
+const cloudFrontDomain = process.env.CLOUDFRONT_DOMAIN;
 
 const s3 = new S3Client({
   credentials: {
@@ -29,21 +30,16 @@ var router = express();
 router.get("/", isAuthenticated, async (req: Request, res: Response) => {
   try {
     const { userID } = req.query;
-
     const products = await courses.find({});
 
     for (let product of products) {
       const imageUrls: string[] = [];
 
-      for (const imageKey of product.image) {
-        const getObjectParam = {
-          Bucket: bucketName,
-          Key: imageKey,
-        };
-        const command = new GetObjectCommand(getObjectParam);
-
-        const signedUrl = await getSignedUrl(s3, command, { expiresIn: 3600 });
-        imageUrls.push(signedUrl);
+      if (Array.isArray(product.image)) {
+        for (const imageKey of product.image) {
+          const imageUrl = `${cloudFrontDomain}/${imageKey}`;
+          imageUrls.push(imageUrl);
+        }
       }
 
       product.image = imageUrls;
@@ -52,83 +48,29 @@ router.get("/", isAuthenticated, async (req: Request, res: Response) => {
     const homebanner = await banner.find({});
 
     for (let homebannerimage of homebanner) {
-      const getObjectHomeBannerParams = {
-        Bucket: bucketName,
-        Key: homebannerimage.image,
-      };
-
-      const commandHomeBanner = new GetObjectCommand(getObjectHomeBannerParams);
-
-      const homeBannerImage = await getSignedUrl(s3, commandHomeBanner, {
-        expiresIn: 3600,
-      });
-      homebannerimage.image = homeBannerImage;
+      homebannerimage.image = `${cloudFrontDomain}/${homebannerimage.image}`;
     }
     const category = await categoryModel.find({});
 
-    // Update category images with signed URLs
     for (let categories of category) {
-      const getObjectCategoryParams = {
-        Bucket: bucketName,
-        Key: categories.image,
-      };
-
-      const commandCategory = new GetObjectCommand(getObjectCategoryParams);
-
-      const categoryImage = await getSignedUrl(s3, commandCategory, {
-        expiresIn: 3600,
-      });
-      categories.image = categoryImage;
+      if (categories.image) {
+        categories.image = `${cloudFrontDomain}/${categories.image}`;
+      }
     }
 
     const offerbanner = await offerbannerModel.find({});
-    // Update offerBanner images with signed URLs
+
     for (let offerbannerImage of offerbanner) {
-      const getObjectOfferBannerParams = {
-        Bucket: bucketName,
-        Key: offerbannerImage.image,
-      };
-
-      const commandOfferBanner = new GetObjectCommand(
-        getObjectOfferBannerParams
-      );
-
-      const offerBannerImage = await getSignedUrl(s3, commandOfferBanner, {
-        expiresIn: 3600,
-      });
-      offerbannerImage.image = offerBannerImage;
+      offerbannerImage.image = `${cloudFrontDomain}/${offerbannerImage.image}`;
     }
 
     const offerdeal = await dealoftheday.find({});
-    // Update offerdeal images with signed URLs
-    for (let offerDeal of offerdeal) {
-      // Generate a pre-signed URL for the image
-      if (offerDeal.image) {
-        const getObjectParamsImage = {
-          Bucket: bucketName,
-          Key: offerDeal.image,
-        };
-        const commandImage = new GetObjectCommand(getObjectParamsImage);
-        const dealDayImage = await getSignedUrl(s3, commandImage, {
-          expiresIn: 3600,
-        });
-        offerDeal.image = dealDayImage;
-      }
 
-      // Generate a pre-signed URL for the logo
-      if (offerDeal.logo) {
-        const getObjectParamsLogo = {
-          Bucket: bucketName,
-          Key: offerDeal.logo,
-        };
-        const commandLogo = new GetObjectCommand(getObjectParamsLogo);
-        const dealDayLogo = await getSignedUrl(s3, commandLogo, {
-          expiresIn: 3600,
-        });
-        offerDeal.logo = dealDayLogo;
-      }
+    for (let offerDeal of offerdeal) {
+      offerDeal.image = `${cloudFrontDomain}/${offerDeal.image}`;
+      offerDeal.logo = `${cloudFrontDomain}/${offerDeal.logo}`;
     }
-    // Get cart product count for the user
+
     const existingCart = await cartModel.findOne({ userID });
     const cartProductCount = existingCart ? existingCart.productID.length : 0;
 
