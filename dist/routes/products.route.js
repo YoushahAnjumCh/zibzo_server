@@ -99,12 +99,21 @@ router.get("/:id", auth_middleware_1.isAuthenticated, async (req, res) => {
 router.get("/category/:id", auth_middleware_1.isAuthenticated, async (req, res) => {
     try {
         const categoryID = req.params.id;
-        console.log(categoryID);
         const products = await product_model_1.default.find({ category: categoryID });
         if (!products) {
             return res.status(404).json({ message: "Product not found!" });
         }
-        res.status(200).json(products);
+        for (let product of products) {
+            const imageUrls = [];
+            if (Array.isArray(product.image)) {
+                for (const imageKey of product.image) {
+                    const imageUrl = `${cloudFrontDomain}/${imageKey}`;
+                    imageUrls.push(imageUrl);
+                }
+            }
+            product.image = imageUrls;
+        }
+        return res.status(200).json(products);
     }
     catch (error) {
         console.error(error);

@@ -113,12 +113,24 @@ router.get(
   async (req: Request, res: Response) => {
     try {
       const categoryID = req.params.id;
-      console.log(categoryID);
       const products = await courses.find({ category: categoryID });
+
       if (!products) {
         return res.status(404).json({ message: "Product not found!" });
       }
-      res.status(200).json(products);
+      for (let product of products) {
+        const imageUrls: string[] = [];
+
+        if (Array.isArray(product.image)) {
+          for (const imageKey of product.image) {
+            const imageUrl = `${cloudFrontDomain}/${imageKey}`;
+            imageUrls.push(imageUrl);
+          }
+        }
+
+        product.image = imageUrls;
+      }
+      return res.status(200).json(products);
     } catch (error) {
       console.error(error);
       res.status(500).json({ message: "Something went wrong!" });
