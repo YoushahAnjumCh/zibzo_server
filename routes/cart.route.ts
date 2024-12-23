@@ -59,7 +59,7 @@ app.post("/", isAuthenticated, async (req: Request, res: Response) => {
 
       const cartProductCount = existingCart.productID.length;
 
-      return res.status(200).json({ existingCart, cartProductCount });
+      return res.status(201).json({ existingCart, cartProductCount });
     } else {
       // Create a new cart for the user
       const newCart = new cartModel({
