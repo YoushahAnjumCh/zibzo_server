@@ -49,7 +49,7 @@ app.post("/", auth_middleware_1.isAuthenticated, async (req, res) => {
             existingCart.productID = Array.from(new Set([...existingCart.productID, productID]));
             await existingCart.save();
             const cartProductCount = existingCart.productID.length;
-            return res.status(200).json({ existingCart, cartProductCount });
+            return res.status(201).json({ existingCart, cartProductCount });
         }
         else {
             // Create a new cart for the user
