@@ -119,7 +119,7 @@ app.delete("/", auth_middleware_1.isAuthenticated, async (req, res) => {
         if (cart.productID.length === 0) {
             await cart_model_1.default.deleteOne({ userID });
             // Emit the cart deleted event to the specific user
-            return res.status(200).json({ message: "Cart deleted as it was empty." });
+            return res.status(404).json({ message: "Cart deleted as it was empty." });
         }
         await cart.save();
         const products = await product_model_1.default.find({
