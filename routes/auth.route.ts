@@ -3,32 +3,54 @@ import signupModel from "../models/signup.model";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { log } from "console";
+import crypto from "crypto";
+import dotenv from "dotenv";
+import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 // import { isAuthenticated } from "middleware/auth.middleware";
 var router = express.Router();
 
 const multer = require("multer");
 const path = require("path");
+dotenv.config();
+const randomImageName = (bytes = 32) =>
+  crypto.randomBytes(bytes).toString("hex");
+const bucketName = process.env.BUCKET_NAME;
+const bucketRegion = process.env.BUCKET_REGION;
+const accessKey = process.env.ACCESS_KEY;
+const secretKey = process.env.SECRET_KEY;
+const cloudFrontDomain = process.env.CLOUDFRONT_DOMAIN;
 
-const storage = multer.diskStorage({
-  destination: function (req: any, file: any, cb: any) {
-    cb(null, "images/");
+const s3 = new S3Client({
+  credentials: {
+    accessKeyId: accessKey || "",
+    secretAccessKey: secretKey || "",
   },
-  filename: function (req: any, file: any, cb: any) {
-    cb(
-      null,
-      file.fieldname + "_" + Date.now() + path.extname(file.originalname)
-    );
+  region: bucketRegion || "",
+  maxAttempts: 5,
+  requestHandler: {
+    httpOptions: {
+      timeout: 300000,
+      maxRedirects: 10,
+    },
   },
 });
 
-const upload = multer({ storage: storage });
+const storage = multer.memoryStorage({});
+
+const upload = multer({
+  storage: storage,
+  limits: { fileSize: 50 * 1024 * 1024 },
+});
 router.post(
   "/signup",
   upload.single("userImage"),
   async (req: any, res: any) => {
     try {
       if (!req.body || !req.body.email) {
-        return res.status(400).json({ msg: "Missing email in request body" });
+        return res.status(400).json({ msg: "email is missing" });
+      }
+      if (!req.file) {
+        return res.status(400).json({ message: "Upload image" });
       }
 
       const { email, password, userName } = req.body;
@@ -36,15 +58,25 @@ router.post(
       if (existingEmail) {
         return res.status(409).json({ msg: "Email already exists" });
       }
+      const categoryImageName = randomImageName();
 
-      const imagePath = req.file ? req.file.filename : "";
+      const uploadCategoryParams = {
+        Bucket: bucketName,
+        Body: req.file.buffer,
+        Key: categoryImageName,
+        ContentType: req.file.mimetype,
+      };
+
+      const commandCategory = new PutObjectCommand(uploadCategoryParams);
+
+      await s3.send(commandCategory);
 
       const newUser = new signupModel({
         email,
         password,
         userName,
         uid: 2,
-        userImage: imagePath,
+        userImage: categoryImageName,
       });
 
       await newUser.save();
@@ -64,6 +96,7 @@ router.post("/login", async (req: Request, res: Response) => {
 
   try {
     const user = await signupModel.findOne({ email: email });
+    const userImage = `${cloudFrontDomain}/${user?.userImage}`;
 
     if (user) {
       if (user.uid == 2) {
@@ -91,7 +124,7 @@ router.post("/login", async (req: Request, res: Response) => {
 
                   userName: user.userName,
                   id: user.id,
-                  image: user.userImage,
+                  image: userImage,
                 });
               }
             }
