@@ -74,8 +74,11 @@ app.get("/", auth_middleware_1.isAuthenticated, async (req, res) => {
             return res.status(400).json({ message: "UserID is required!" });
         }
         const existingCart = await cart_model_1.default.findOne({ userID });
+        const cartProductCount = existingCart ? existingCart.productID.length : 0;
         if (!existingCart) {
-            return res.status(404).json({ message: "Cart is Empty!" });
+            return res
+                .status(404)
+                .json({ message: "Cart is Empty!", cartProductCount });
         }
         if (!existingCart.productID || existingCart.productID.length === 0) {
             return res
@@ -98,7 +101,6 @@ app.get("/", auth_middleware_1.isAuthenticated, async (req, res) => {
         if (products.length === 0) {
             return res.status(404).json({ message: "No matching products found!" });
         }
-        const cartProductCount = existingCart ? existingCart.productID.length : 0;
         return res
             .status(200)
             .json({ cart: existingCart, products, cartProductCount });
@@ -118,8 +120,10 @@ app.delete("/", auth_middleware_1.isAuthenticated, async (req, res) => {
         cart.productID = cart.productID.filter((id) => id !== productID);
         if (cart.productID.length === 0) {
             await cart_model_1.default.deleteOne({ userID });
-            // Emit the cart deleted event to the specific user
-            return res.status(404).json({ message: "Cart deleted as it was empty." });
+            const cartProductCount = cart.productID.length;
+            return res
+                .status(404)
+                .json({ message: "Cart deleted as it was empty.", cartProductCount });
         }
         await cart.save();
         const products = await product_model_1.default.find({

@@ -87,9 +87,12 @@ app.get("/", isAuthenticated, async (req: Request, res: Response) => {
     }
 
     const existingCart = await cartModel.findOne({ userID });
+    const cartProductCount = existingCart ? existingCart.productID.length : 0;
 
     if (!existingCart) {
-      return res.status(404).json({ message: "Cart is Empty!" });
+      return res
+        .status(404)
+        .json({ message: "Cart is Empty!", cartProductCount });
     }
 
     if (!existingCart.productID || existingCart.productID.length === 0) {
@@ -117,7 +120,6 @@ app.get("/", isAuthenticated, async (req: Request, res: Response) => {
     if (products.length === 0) {
       return res.status(404).json({ message: "No matching products found!" });
     }
-    const cartProductCount = existingCart ? existingCart.productID.length : 0;
 
     return res
       .status(200)
@@ -142,8 +144,11 @@ app.delete("/", isAuthenticated, async (req: Request, res: Response) => {
     if (cart.productID.length === 0) {
       await cartModel.deleteOne({ userID });
 
-      // Emit the cart deleted event to the specific user
-      return res.status(404).json({ message: "Cart deleted as it was empty." });
+      const cartProductCount = cart.productID.length;
+
+      return res
+        .status(404)
+        .json({ message: "Cart deleted as it was empty.", cartProductCount });
     }
 
     await cart.save();

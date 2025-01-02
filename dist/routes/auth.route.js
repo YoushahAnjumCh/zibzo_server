@@ -45,9 +45,6 @@ router.post("/signup", upload.single("userImage"), async (req, res) => {
         if (!req.body || !req.body.email) {
             return res.status(400).json({ msg: "email is missing" });
         }
-        if (!req.file) {
-            return res.status(400).json({ message: "Upload image" });
-        }
         const { email, password, userName } = req.body;
         const existingEmail = await signup_model_1.default.findOne({ email });
         if (existingEmail) {
