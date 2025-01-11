@@ -55,25 +55,30 @@ router.post(
       if (existingEmail) {
         return res.status(409).json({ msg: "Email already exists" });
       }
-      const categoryImageName = randomImageName();
+      let userImage = "";
 
-      const uploadCategoryParams = {
-        Bucket: bucketName,
-        Body: req.file.buffer,
-        Key: categoryImageName,
-        ContentType: req.file.mimetype,
-      };
+      if (req.file) {
+        const categoryImageName = randomImageName();
 
-      const commandCategory = new PutObjectCommand(uploadCategoryParams);
+        const uploadCategoryParams = {
+          Bucket: bucketName,
+          Body: req.file.buffer,
+          Key: categoryImageName,
+          ContentType: req.file.mimetype,
+        };
 
-      await s3.send(commandCategory);
+        const commandCategory = new PutObjectCommand(uploadCategoryParams);
 
+        await s3.send(commandCategory);
+
+        userImage = categoryImageName;
+      }
       const newUser = new signupModel({
         email,
         password,
         userName,
         uid: 2,
-        userImage: categoryImageName,
+        userImage: userImage,
       });
 
       await newUser.save();
