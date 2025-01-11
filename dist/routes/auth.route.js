@@ -50,21 +50,25 @@ router.post("/signup", upload.single("userImage"), async (req, res) => {
         if (existingEmail) {
             return res.status(409).json({ msg: "Email already exists" });
         }
-        const categoryImageName = randomImageName();
-        const uploadCategoryParams = {
-            Bucket: bucketName,
-            Body: req.file.buffer,
-            Key: categoryImageName,
-            ContentType: req.file.mimetype,
-        };
-        const commandCategory = new client_s3_1.PutObjectCommand(uploadCategoryParams);
-        await s3.send(commandCategory);
+        let userImage = "";
+        if (req.file) {
+            const categoryImageName = randomImageName();
+            const uploadCategoryParams = {
+                Bucket: bucketName,
+                Body: req.file.buffer,
+                Key: categoryImageName,
+                ContentType: req.file.mimetype,
+            };
+            const commandCategory = new client_s3_1.PutObjectCommand(uploadCategoryParams);
+            await s3.send(commandCategory);
+            userImage = categoryImageName;
+        }
         const newUser = new signup_model_1.default({
             email,
             password,
             userName,
             uid: 2,
-            userImage: categoryImageName,
+            userImage: userImage,
         });
         await newUser.save();
         const { id } = newUser;
