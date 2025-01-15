@@ -78,6 +78,25 @@ router.get("/", auth_middleware_1.isAuthenticated, async (req, res) => {
         res.status(500).json({ message: "Something went wrong!" });
     }
 });
+router.get("/search", auth_middleware_1.isAuthenticated, async function (req, res) {
+    const query = req.query.q;
+    const { limit, offset } = req.query;
+    console.log(query);
+    let listOfProducts = await product_model_1.default
+        .find({
+        title: { $regex: new RegExp(query, "i") },
+    })
+        .sort({ title: 1 })
+        .limit(parseInt(limit))
+        .skip(parseInt(offset));
+    res.json(listOfProducts);
+    try {
+    }
+    catch (error) {
+        console.log(error);
+        res.status(500).json({ msg: "Something went wrong !" });
+    }
+});
 router.get("/:id", auth_middleware_1.isAuthenticated, async (req, res) => {
     try {
         const id = req.params.id;
@@ -95,7 +114,7 @@ router.get("/:id", auth_middleware_1.isAuthenticated, async (req, res) => {
         res.status(500).json({ message: "Something went wrong!" });
     }
 });
-//Get By Category
+// Get By Category
 router.get("/category/:id", auth_middleware_1.isAuthenticated, async (req, res) => {
     try {
         const categoryID = req.params.id;
