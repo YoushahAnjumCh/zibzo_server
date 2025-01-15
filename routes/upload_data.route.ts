@@ -1,6 +1,6 @@
 import express, { Request, Response } from "express";
 
-import courses from "../models/product.model";
+import product from "../models/product.model";
 import bannerModel from "../models/banner_model";
 import categoryModel from "../models/category.model";
 import offerbannerModel from "../models/offer_banner.model";
@@ -78,7 +78,7 @@ router.post(
         imagePaths.push(imageName);
       }
 
-      const newProductToBeInserted = new courses({
+      const newProductToBeInserted = new product({
         ...newProductFromRequest,
         image: imagePaths,
       });

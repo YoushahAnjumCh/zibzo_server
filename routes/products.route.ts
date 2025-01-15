@@ -1,6 +1,6 @@
 import express, { Request, Response } from "express";
 
-import courses from "../models/product.model";
+import product from "../models/product.model";
 import banner from "../models/banner_model";
 import cartModel from "../models/cart.model";
 import { isAuthenticated } from "../middleware/auth.middleware";
@@ -9,7 +9,7 @@ import categoryModel from "../models/category.model";
 import offerbannerModel from "../models/offer_banner.model";
 import dealoftheday from "../models/deal_of_the_day.model";
 import mongoose from "mongoose";
-import { S3Client, GetObjectCommand } from "@aws-sdk/client-s3";
+import { S3Client } from "@aws-sdk/client-s3";
 dotenv.config();
 const bucketName = process.env.BUCKET_NAME;
 const bucketRegion = process.env.BUCKET_REGION;
@@ -29,7 +29,7 @@ var router = express();
 router.get("/", isAuthenticated, async (req: Request, res: Response) => {
   try {
     const { userID } = req.query;
-    const products = await courses.find({});
+    const products = await product.find({});
 
     for (let product of products) {
       const imageUrls: string[] = [];
@@ -88,6 +88,29 @@ router.get("/", isAuthenticated, async (req: Request, res: Response) => {
   }
 });
 
+router.get(
+  "/search",
+  isAuthenticated,
+  async function (req: Request, res: Response) {
+    const query = req.query.q as string;
+    const { limit, offset } = req.query;
+    console.log(query);
+    let listOfProducts = await product
+      .find({
+        title: { $regex: new RegExp(query, "i") },
+      })
+      .sort({ title: 1 })
+      .limit(parseInt(limit as string))
+      .skip(parseInt(offset as string));
+    res.json(listOfProducts);
+    try {
+    } catch (error) {
+      console.log(error);
+      res.status(500).json({ msg: "Something went wrong !" });
+    }
+  }
+);
+
 router.get("/:id", isAuthenticated, async (req: Request, res: Response) => {
   try {
     const id = req.params.id;
@@ -96,7 +119,7 @@ router.get("/:id", isAuthenticated, async (req: Request, res: Response) => {
       return res.status(400).json({ message: "Invalid product ID!" });
     }
 
-    const products = await courses.findOne({ _id: id });
+    const products = await product.findOne({ _id: id });
     if (!products) {
       return res.status(404).json({ message: "Product not found!" });
     }
@@ -106,14 +129,15 @@ router.get("/:id", isAuthenticated, async (req: Request, res: Response) => {
     res.status(500).json({ message: "Something went wrong!" });
   }
 });
-//Get By Category
+// Get By Category
+
 router.get(
   "/category/:id",
   isAuthenticated,
   async (req: Request, res: Response) => {
     try {
       const categoryID = req.params.id;
-      const products = await courses.find({ category: categoryID });
+      const products = await product.find({ category: categoryID });
 
       if (!products) {
         return res.status(404).json({ message: "Product not found!" });
@@ -149,7 +173,7 @@ router.delete(
         return res.status(400).json({ message: "Invalid product ID!" });
       }
 
-      const result = await courses.deleteOne({ id });
+      const result = await product.deleteOne({ id });
 
       if (result.deletedCount === 0) {
         return res.status(404).json({ message: "Product not found!" });

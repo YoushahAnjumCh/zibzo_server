@@ -1,8 +1,5 @@
 import express, { Request, Response } from "express";
 
-import courses from "../models/product.model";
-import orderDetails from "../models/order_detail.model";
-
 import { isAuthenticated } from "../middleware/auth.middleware";
 var router = express.Router();
 
