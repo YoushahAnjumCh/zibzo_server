@@ -35,27 +35,23 @@ app.post("/", auth_middleware_1.isAuthenticated, async (req, res) => {
                 .status(400)
                 .json({ message: "userID and productID are required!" });
         }
-        // Check if the cart exists for the user
         const existingCart = await cart_model_1.default.findOne({ userID });
         if (existingCart) {
-            // Check if the productID already exists in the cart
             const isProductAlreadyAdded = existingCart.productID.includes(productID);
             if (isProductAlreadyAdded) {
                 return res
                     .status(400)
                     .json({ message: "Product already added to the cart!" });
             }
-            // Add the productID to the array (ensuring uniqueness)
             existingCart.productID = Array.from(new Set([...existingCart.productID, productID]));
             await existingCart.save();
             const cartProductCount = existingCart.productID.length;
             return res.status(201).json({ existingCart, cartProductCount });
         }
         else {
-            // Create a new cart for the user
             const newCart = new cart_model_1.default({
                 userID,
-                productID: [productID], // Initialize as an array
+                productID: [productID],
             });
             await newCart.save();
             const cartProductCount = newCart.productID.length;
@@ -120,10 +116,11 @@ app.delete("/", auth_middleware_1.isAuthenticated, async (req, res) => {
         cart.productID = cart.productID.filter((id) => id !== productID);
         if (cart.productID.length === 0) {
             await cart_model_1.default.deleteOne({ userID });
-            const cartProductCount = cart.productID.length;
-            return res
-                .status(404)
-                .json({ message: "Cart deleted as it was empty.", cartProductCount });
+            return res.status(200).json({
+                message: "Cart deleted as it was empty.",
+                deletedProductID: productID,
+                cartProductCount: 0,
+            });
         }
         await cart.save();
         const products = await product_model_1.default.find({
@@ -143,7 +140,13 @@ app.delete("/", auth_middleware_1.isAuthenticated, async (req, res) => {
             return res.status(404).json({ message: "No matching products found!" });
         }
         const cartProductCount = cart ? cart.productID.length : 0;
-        return res.status(200).json({ cart: cart, products, cartProductCount });
+        return res.status(200).json({
+            message: "Product successfully removed from the cart.",
+            deletedProductID: productID,
+            cart: cart,
+            products,
+            cartProductCount,
+        });
     }
     catch (error) {
         console.error(error);
