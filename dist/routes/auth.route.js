@@ -45,13 +45,13 @@ router.post("/signup", upload.single("userImage"), async (req, res) => {
         if (!req.body || !req.body.email) {
             return res.status(400).json({ msg: "email is missing" });
         }
-        const { email, password, userName } = req.body;
+        const { email, password, userName, userImage } = req.body;
         const existingEmail = await signup_model_1.default.findOne({ email });
         if (existingEmail) {
             return res.status(409).json({ msg: "Email already exists" });
         }
-        let userImage = "";
-        if (req.file) {
+        let userImages = "";
+        if (req.file && userImage != "") {
             const categoryImageName = randomImageName();
             const uploadCategoryParams = {
                 Bucket: bucketName,
@@ -61,14 +61,14 @@ router.post("/signup", upload.single("userImage"), async (req, res) => {
             };
             const commandCategory = new client_s3_1.PutObjectCommand(uploadCategoryParams);
             await s3.send(commandCategory);
-            userImage = categoryImageName;
+            userImages = categoryImageName;
         }
         const newUser = new signup_model_1.default({
             email,
             password,
             userName,
             uid: 2,
-            userImage: userImage,
+            userImage: userImages,
         });
         await newUser.save();
         const { id } = newUser;

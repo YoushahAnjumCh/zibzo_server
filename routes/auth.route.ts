@@ -50,14 +50,14 @@ router.post(
         return res.status(400).json({ msg: "email is missing" });
       }
 
-      const { email, password, userName } = req.body;
+      const { email, password, userName, userImage } = req.body;
       const existingEmail = await signupModel.findOne({ email });
       if (existingEmail) {
         return res.status(409).json({ msg: "Email already exists" });
       }
-      let userImage = "";
+      let userImages = "";
 
-      if (req.file) {
+      if (req.file && userImage != "") {
         const categoryImageName = randomImageName();
 
         const uploadCategoryParams = {
@@ -71,14 +71,14 @@ router.post(
 
         await s3.send(commandCategory);
 
-        userImage = categoryImageName;
+        userImages = categoryImageName;
       }
       const newUser = new signupModel({
         email,
         password,
         userName,
         uid: 2,
-        userImage: userImage,
+        userImage: userImages,
       });
 
       await newUser.save();
