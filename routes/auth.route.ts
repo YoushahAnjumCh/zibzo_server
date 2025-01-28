@@ -51,6 +51,7 @@ router.post(
       }
 
       const { email, password, userName, userImage } = req.body;
+      console.log(userImage);
       const existingEmail = await signupModel.findOne({ email });
       if (existingEmail) {
         return res.status(409).json({ msg: "Email already exists" });
@@ -97,8 +98,10 @@ router.post("/login", async (req: Request, res: Response) => {
   const { email, password } = req.body;
   try {
     const user = await signupModel.findOne({ email: email });
-    const userImage = `${cloudFrontDomain}/${user?.userImage}`;
-
+    let userImage = "";
+    if (user?.userImage != "") {
+      userImage = `${cloudFrontDomain}/${user?.userImage}`;
+    }
     if (user) {
       if (user.uid == 2) {
         const isMatch = await bcrypt.compare(password, user.password);
