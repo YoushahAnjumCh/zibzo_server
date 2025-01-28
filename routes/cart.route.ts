@@ -146,9 +146,11 @@ app.delete("/", isAuthenticated, async (req: Request, res: Response) => {
 
       const cartProductCount = cart.productID.length;
 
-      return res
-        .status(404)
-        .json({ message: "Cart deleted as it was empty.", cartProductCount });
+      return res.status(404).json({
+        message: "Cart deleted as it was empty.",
+        cartProductCount,
+        deletedProductID: productID,
+      });
     }
 
     await cart.save();
@@ -174,7 +176,14 @@ app.delete("/", isAuthenticated, async (req: Request, res: Response) => {
     }
     const cartProductCount = cart ? cart.productID.length : 0;
 
-    return res.status(200).json({ cart: cart, products, cartProductCount });
+    return res
+      .status(200)
+      .json({
+        cart: cart,
+        products,
+        cartProductCount,
+        deletedProductID: productID,
+      });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Something went wrong!" });
