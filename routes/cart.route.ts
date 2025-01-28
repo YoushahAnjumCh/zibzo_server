@@ -38,11 +38,9 @@ app.post("/", isAuthenticated, async (req: Request, res: Response) => {
         .json({ message: "userID and productID are required!" });
     }
 
-    // Check if the cart exists for the user
     const existingCart = await cartModel.findOne({ userID });
 
     if (existingCart) {
-      // Check if the productID already exists in the cart
       const isProductAlreadyAdded = existingCart.productID.includes(productID);
 
       if (isProductAlreadyAdded) {
@@ -51,7 +49,6 @@ app.post("/", isAuthenticated, async (req: Request, res: Response) => {
           .json({ message: "Product already added to the cart!" });
       }
 
-      // Add the productID to the array (ensuring uniqueness)
       existingCart.productID = Array.from(
         new Set([...existingCart.productID, productID])
       );
@@ -61,10 +58,9 @@ app.post("/", isAuthenticated, async (req: Request, res: Response) => {
 
       return res.status(201).json({ existingCart, cartProductCount });
     } else {
-      // Create a new cart for the user
       const newCart = new cartModel({
         userID,
-        productID: [productID], // Initialize as an array
+        productID: [productID],
       });
       await newCart.save();
 
@@ -150,6 +146,7 @@ app.delete("/", isAuthenticated, async (req: Request, res: Response) => {
         message: "Cart deleted as it was empty.",
         cartProductCount,
         deletedProductID: productID,
+
       });
     }
 
@@ -176,14 +173,15 @@ app.delete("/", isAuthenticated, async (req: Request, res: Response) => {
     }
     const cartProductCount = cart ? cart.productID.length : 0;
 
-    return res
-      .status(200)
-      .json({
-        cart: cart,
-        products,
-        cartProductCount,
-        deletedProductID: productID,
-      });
+
+    return res.status(200).json({
+      message: "Product successfully removed from the cart.",
+      deletedProductID: productID,
+      cart: cart,
+      products,
+      cartProductCount,
+    });
+
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Something went wrong!" });
