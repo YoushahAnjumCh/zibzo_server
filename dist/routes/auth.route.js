@@ -46,6 +46,7 @@ router.post("/signup", upload.single("userImage"), async (req, res) => {
             return res.status(400).json({ msg: "email is missing" });
         }
         const { email, password, userName, userImage } = req.body;
+        console.log(userImage);
         const existingEmail = await signup_model_1.default.findOne({ email });
         if (existingEmail) {
             return res.status(409).json({ msg: "Email already exists" });
@@ -85,7 +86,10 @@ router.post("/login", async (req, res) => {
     const { email, password } = req.body;
     try {
         const user = await signup_model_1.default.findOne({ email: email });
-        const userImage = `${cloudFrontDomain}/${user === null || user === void 0 ? void 0 : user.userImage}`;
+        let userImage = "";
+        if ((user === null || user === void 0 ? void 0 : user.userImage) != "") {
+            userImage = `${cloudFrontDomain}/${user === null || user === void 0 ? void 0 : user.userImage}`;
+        }
         if (user) {
             if (user.uid == 2) {
                 const isMatch = await bcrypt_1.default.compare(password, user.password);

@@ -116,7 +116,6 @@ app.delete("/", auth_middleware_1.isAuthenticated, async (req, res) => {
         cart.productID = cart.productID.filter((id) => id !== productID);
         if (cart.productID.length === 0) {
             await cart_model_1.default.deleteOne({ userID });
-
             const cartProductCount = cart.productID.length;
             return res.status(404).json({
                 message: "Cart deleted as it was empty.",
@@ -142,15 +141,12 @@ app.delete("/", auth_middleware_1.isAuthenticated, async (req, res) => {
             return res.status(404).json({ message: "No matching products found!" });
         }
         const cartProductCount = cart ? cart.productID.length : 0;
-
-        return res
-            .status(200)
-            .json({
-                      message: "Product successfully removed from the cart.",
+        return res.status(200).json({
+            message: "Product successfully removed from the cart.",
+            deletedProductID: productID,
             cart: cart,
             products,
             cartProductCount,
-            deletedProductID: productID,
         });
     }
     catch (error) {
